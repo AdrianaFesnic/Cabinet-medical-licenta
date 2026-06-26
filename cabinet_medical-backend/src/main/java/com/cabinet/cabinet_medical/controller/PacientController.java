@@ -5,6 +5,7 @@ import com.cabinet.cabinet_medical.dto.ProgramareRequest;
 import com.cabinet.cabinet_medical.entity.*;
 import com.cabinet.cabinet_medical.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -123,7 +124,13 @@ public class PacientController {
         programare.setAppointmentDate(dataOra);
         programare.setReason(request.getReason());
         programare.setStatus("asteptare");
-        programareRepository.save(programare);
+
+        try {
+            programareRepository.save(programare);
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body("Ora selectată a fost ocupată chiar acum de altcineva. Vă rugăm alegeți altă oră.");
+        }
+
         return ResponseEntity.ok(programare);
     }
 
