@@ -202,7 +202,6 @@ public class MedicController {
             @PathVariable Long id,
             @RequestParam String rezultat,
             Authentication auth) {
-        Medic medic = getMedicFromAuth(auth);
         Analiza analiza = analizaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Analiza not found"));
 
