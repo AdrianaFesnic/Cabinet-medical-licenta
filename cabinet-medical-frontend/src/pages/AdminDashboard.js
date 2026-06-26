@@ -19,6 +19,7 @@ const AdminDashboard = () => {
     const [editMedic, setEditMedic] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [fieldError, setFieldError] = useState('');
     const [dataSelectata, setDataSelectata] = useState('');
     const [programariZi, setProgramariZi] = useState(null);
     const [formData, setFormData] = useState({
@@ -55,11 +56,27 @@ const AdminDashboard = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFieldError('');
+    };
+
+    const traduMesajEroare = (mesajBackend) => {
+        if (!mesajBackend) return { camp: null, text: 'Eroare la adăugarea medicului!' };
+        if (mesajBackend.includes('Username already exists')) {
+            return { camp: 'username', text: 'Acest username este deja folosit.' };
+        }
+        if (mesajBackend.includes('Email already exists')) {
+            return { camp: 'email', text: 'Acest email este deja înregistrat.' };
+        }
+        if (mesajBackend.includes('CNP already exists')) {
+            return { camp: 'cnp', text: 'Acest CNP este deja înregistrat.' };
+        }
+        return { camp: null, text: 'Eroare la adăugarea medicului!' };
     };
 
     const handleAddDoctor = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setFieldError('');
         try {
             await api.post('/admin/register/doctor', formData);
             setMessage('Medic adăugat cu succes!');
@@ -68,7 +85,13 @@ const AdminDashboard = () => {
             fetchData();
             setTimeout(() => setMessage(''), 3000);
         } catch (err) {
-            setMessage('Eroare la adăugarea medicului!');
+            const mesajBackend = err.response?.data?.message || err.message;
+            const { camp, text } = traduMesajEroare(mesajBackend);
+            if (camp) {
+                setFieldError({ camp, text });
+            } else {
+                setMessage(text);
+            }
         } finally {
             setLoading(false);
         }
@@ -185,7 +208,7 @@ const AdminDashboard = () => {
                 <div style={styles.topBar}>
                     <h2 style={styles.pageTitle}>Panou Administrator</h2>
                     <button
-                        onClick={() => setShowAddDoctor(!showAddDoctor)}
+                        onClick={() => { setShowAddDoctor(!showAddDoctor); setFieldError(''); }}
                         style={styles.addBtn}
                     >
                         {showAddDoctor ? '✕ Anulează' : '+ Adaugă Medic'}
@@ -223,13 +246,19 @@ const AdminDashboard = () => {
                                     <div key={field.name} style={styles.inputGroup}>
                                         <label style={styles.label}>{field.label}</label>
                                         <input
-                                            style={styles.input}
+                                            style={{
+                                                ...styles.input,
+                                                borderColor: fieldError.camp === field.name ? '#fc8181' : '#e2e8f0',
+                                            }}
                                             type={field.type || 'text'}
                                             name={field.name}
                                             value={formData[field.name]}
                                             onChange={handleChange}
                                             required
                                         />
+                                        {fieldError.camp === field.name && (
+                                            <span style={styles.fieldErrorText}>{fieldError.text}</span>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -652,6 +681,12 @@ const styles = {
         border: '1px solid #e2e8f0',
         fontSize: '14px',
         outline: 'none',
+    },
+    fieldErrorText: {
+        color: '#c53030',
+        fontSize: '12px',
+        marginTop: '4px',
+        display: 'block',
     },
     submitBtn: {
         backgroundColor: '#276749',

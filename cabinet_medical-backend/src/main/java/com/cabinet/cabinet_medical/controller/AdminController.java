@@ -9,6 +9,7 @@ import com.cabinet.cabinet_medical.entity.Utilizator;
 import com.cabinet.cabinet_medical.repository.*;
 import com.cabinet.cabinet_medical.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
@@ -124,5 +125,12 @@ public class AdminController {
         }).toList());
 
         return ResponseEntity.ok(result);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }
