@@ -48,6 +48,9 @@ public class AuthService {
         if (utilizatorRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
+        if (pacientRepository.existsByCnp(request.getCnp())) {
+            throw new RuntimeException("CNP already exists");
+        }
 
         Utilizator user = new Utilizator();
         user.setUsername(request.getUsername());
@@ -72,6 +75,12 @@ public class AuthService {
     public AuthResponse registerDoctor(RegisterRequest request) {
         if (utilizatorRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists");
+        }
+        if (utilizatorRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+        if (medicRepository.existsByCnp(request.getCnp())) {
+            throw new RuntimeException("CNP already exists");
         }
 
         Utilizator user = new Utilizator();
