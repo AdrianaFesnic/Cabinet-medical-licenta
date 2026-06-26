@@ -32,11 +32,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.registerPatient(request));
     }
 
-    @PostMapping("/register/doctor")
-    public ResponseEntity<AuthResponse> registerDoctor(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(authService.registerDoctor(request));
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
