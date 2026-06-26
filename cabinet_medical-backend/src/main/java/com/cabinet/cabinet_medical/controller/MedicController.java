@@ -124,8 +124,14 @@ public class MedicController {
             @PathVariable Long id,
             @RequestBody ConsultatieRequest request,
             Authentication auth) {
+        Medic medic = getMedicFromAuth(auth);
         Consultatie consultatie = consultatieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Consultatie not found"));
+
+        if (!consultatie.getDoctor().getId().equals(medic.getId())) {
+            throw new RuntimeException("Not authorized");
+        }
+
         if (request.getSymptoms() != null) consultatie.setSymptoms(request.getSymptoms());
         if (request.getDiagnosis() != null) consultatie.setDiagnosis(request.getDiagnosis());
         if (request.getTreatment() != null) consultatie.setTreatment(request.getTreatment());
@@ -196,8 +202,10 @@ public class MedicController {
             @PathVariable Long id,
             @RequestParam String rezultat,
             Authentication auth) {
+        Medic medic = getMedicFromAuth(auth);
         Analiza analiza = analizaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Analiza not found"));
+
         analiza.setResult(rezultat);
         analiza.setStatus("finalizat");
         analiza.setResultDate(java.time.LocalDate.now());
